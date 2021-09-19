@@ -1,1 +1,1 @@
-web: gunicorn -w 4 -k uvicorn.worlers.UvicornWorker testapi:app
+web: gunicorn -w 4 -k uvicorn.workers.UvicornWorker testapi:app
