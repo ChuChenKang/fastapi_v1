@@ -40,8 +40,14 @@ async def covid_new_case(item:Item):
     response = requests.request("GET", url, headers=headers, params=querystring)
     js = json.loads(response.text)
     result = js.get('response')[0]
-    cases = result['cases']['new']
-    return {'new_case': cases}
+    country = result['country']
+    population = result['population']
+    new_cases = result['cases']['new']
+    active_case = result['cases']['active']
+    total_case = result['cases']['total']
+    new_death = result['deaths']['new']
+    total_death = result['deaths']['total']
+    return {'country': country, 'population': population, 'new_case': new_cases, 'active_case': active_case, 'total_case':total_case, 'new_death': new_death, 'total_death': total_death}
 
 @app.get("/item/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
