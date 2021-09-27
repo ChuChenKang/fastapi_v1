@@ -28,7 +28,7 @@ class Login(BaseModel):
     password: str
 
 class OTP(BaseModel) :
-    phone_no: int
+    phone_no: str
 
 client = Client("AC640aaf98ffad1bb2981ef084c555fc61","0b12b6dba6bb6a9b1995513a99b8b839")
 
