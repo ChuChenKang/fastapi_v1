@@ -30,7 +30,7 @@ class Login(BaseModel):
 class OTP(BaseModel) :
     phone_no: str
 
-client = Client("AC640aaf98ffad1bb2981ef084c555fc61","0b12b6dba6bb6a9b1995513a99b8b839")
+client = Client("AC640aaf98ffad1bb2981ef084c555fc61","c5c3a6a0260f82b1a16e1006a1e38957")
 
 app = FastAPI()
 
