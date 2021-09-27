@@ -2,11 +2,14 @@ from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from datetime import timedelta
+from twilio.rest import Client
 import requests
 import json
 import redis
 import os
 import crypto_utils
+import math, random
+
 
 class Item(BaseModel):
     country: str
@@ -19,6 +22,15 @@ class Secret(BaseModel):
 
 class Passphrase(BaseModel):
     passphrase: str
+
+class Login(BaseModel):
+    username: str
+    password: str
+
+class OTP(BaseModel) :
+    phone_no: int
+
+client = Client("AC640aaf98ffad1bb2981ef084c555fc61","0b12b6dba6bb6a9b1995513a99b8b839")
 
 app = FastAPI()
 
@@ -83,3 +95,35 @@ def read_secret(secret_id: str, passphrase: Passphrase):
     r.delete(secret_id)
     plaintext = crypto_utils.decrypt(passphrase, ciphertext)
     return {"success": "True", "message": plaintext}
+
+
+@app.post("/login/")
+async def loginpage(login:Login):
+
+    username = login.username
+    password = login.password
+    result = {}
+
+    if username == "" or password == "":
+        result = {"message" : "Please enter correct username or password"}
+        return result
+    else:
+        result = {"message" : "Please proceed"}
+        return result
+
+@app.post("/otp/")
+async def otp_twillio(otp:OTP):
+
+    digits = "0123456789"
+    otp_no = ""
+    phone_no = otp.phone_no
+
+    for i in range(6) :
+        otp_no += digits[math.floor(random.random() * 10)]
+
+    client.messages.create(to= "+60" + str(phone_no),
+        from_= "+12012994622",
+        body="This is your exabytes bot OTP number : "+ otp_no
+    )
+    return {"otp_no": otp_no}
+    
