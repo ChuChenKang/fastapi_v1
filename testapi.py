@@ -45,6 +45,10 @@ r = redis.Redis(
     ssl=os.getenv("REDIS_SSL", "True") == "True",
 )
 
+@app.post("/webhook/")
+async def webhook():
+    return "Test"
+
 
 @app.post("/domain/")
 async def domain_who_is(domain:Domain):
