@@ -30,6 +30,10 @@ class Login(BaseModel):
 class OTP(BaseModel) :
     phone_no: str
 
+class Domain(BaseModel) :
+    domain_name: str
+
+
 client = Client("AC640aaf98ffad1bb2981ef084c555fc61","c5c3a6a0260f82b1a16e1006a1e38957")
 
 app = FastAPI()
@@ -40,6 +44,21 @@ r = redis.Redis(
     password=os.getenv("DB_PASSWORD", None),
     ssl=os.getenv("REDIS_SSL", "True") == "True",
 )
+
+
+@app.post("/domain/")
+async def domain_who_is(domain:Domain):
+    url = "https://id-sandbox.exabytes.dev/whmcs/includes/api.php"
+    payload = {
+        "action" : "DomainWhois",
+        "identifier" : "E2RNlKmSrrtEH1lGH0jjjC3lsQ0F0e8J",
+        "secret" : "DHmXsfmq4og4wIgnpp9nKC6OXjc7xRwq",
+        "domain" : domain.domain_name,
+        "responsetype" : "json"
+    }
+    response = requests.request("POST", url, data=payload)
+    js = json.loads(response.text)
+    return js
 
 @app.post("/covidCase/")
 async def covid_new_case(item:Item):
