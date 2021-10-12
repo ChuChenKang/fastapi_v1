@@ -30,8 +30,13 @@ class Login(BaseModel):
 class OTP(BaseModel) :
     phone_no: str
 
-class Domain(BaseModel) :
+class DomainWhoIs(BaseModel) :
     domain_name: str
+
+class GetClientsDetails(BaseModel) :
+    clientid: str
+    stats: bool
+
 
 
 client = Client("AC640aaf98ffad1bb2981ef084c555fc61","c5c3a6a0260f82b1a16e1006a1e38957")
@@ -45,19 +50,72 @@ r = redis.Redis(
     ssl=os.getenv("REDIS_SSL", "True") == "True",
 )
 
-@app.post("/webhook/")
-async def webhook():
-    return "Test"
-
 
 @app.post("/domain/")
-async def domain_who_is(domain:Domain):
+async def domain_who_is(domain:DomainWhoIs):
+    try:
+        url = "https://id-sandbox.exabytes.dev/whmcs/includes/api.php"
+        payload = {
+            "action" : "DomainWhois",
+            "identifier" : "y0ZE1q0CCAUpvgKuWbNZ3HN92gCeKu3e",
+            "secret" : "laHlZjvdVrIrjt44qh1BF7CgnHMK0Zgq",
+            "domain" : domain.domain_name,   
+            "responsetype" : "json"
+        }
+        response = requests.request("POST", url, data=payload)
+        js = json.loads(response.text)
+        return js
+        
+    except:
+        error = HTTPException
+        print(error)
+
+        
+            
+@app.post("/domain_suggestion/")
+async def domain_suggestion(domain:DomainWhoIs):
+
+    domain_name = domain.domain_name
+    
+    try:
+        domain_result = []
+        domain_extensions = ['.com', '.shop']
+        for domain_extension in domain_extensions:
+            if domain_name.endswith(domain_extension):
+                cut_url = domain_name[:-len(domain_extension)]
+        
+        for domain_extension in domain_extensions:
+            new_domain = cut_url + domain_extension
+            
+            url = "https://id-sandbox.exabytes.dev/whmcs/includes/api.php"
+            payload = {
+                "action" : "DomainWhois",
+                "identifier" : "y0ZE1q0CCAUpvgKuWbNZ3HN92gCeKu3e",
+                "secret" : "laHlZjvdVrIrjt44qh1BF7CgnHMK0Zgq",
+                "domain" : new_domain,   
+                "responsetype" : "json"
+            }
+            response = requests.request("POST", url, data=payload)
+            js = json.loads(response.text)
+            status = js.get('status')
+
+            if status == 'available' :
+                domain_result.append(new_domain)         
+        
+        return {"available_domain": domain_result}
+    except:
+        error = HTTPException
+        print(error)
+
+@app.post("/clientDetail/")
+async def domain_who_is(client_detail:GetClientsDetails):
     url = "https://id-sandbox.exabytes.dev/whmcs/includes/api.php"
     payload = {
-        "action" : "DomainWhois",
-        "identifier" : "E2RNlKmSrrtEH1lGH0jjjC3lsQ0F0e8J",
-        "secret" : "DHmXsfmq4og4wIgnpp9nKC6OXjc7xRwq",
-        "domain" : domain.domain_name,
+        "action" : "GetClientsDetails",
+        "identifier" : "bzZllItWmAm6FCv5SFXthXnKmEMpG63x",
+        "secret" : "YaYZpmmksggrKVyUmFBYp9JQLhPHhvhD",
+        "clientid" : client_detail.clientid,
+        "stats" : client_detail.stats,
         "responsetype" : "json"
     }
     response = requests.request("POST", url, data=payload)
