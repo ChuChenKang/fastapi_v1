@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from datetime import timedelta
-from twilio.rest import Client
 import requests
 import json
 import redis
@@ -36,10 +35,6 @@ class DomainWhoIs(BaseModel) :
 class GetClientsDetails(BaseModel) :
     clientid: str
     stats: bool
-
-
-
-client = Client("AC640aaf98ffad1bb2981ef084c555fc61","c5c3a6a0260f82b1a16e1006a1e38957")
 
 app = FastAPI()
 
@@ -191,20 +186,4 @@ async def loginpage(login:Login):
     else:
         result = {"message" : "Please proceed"}
         return result
-
-@app.post("/otp/")
-async def otp_twillio(otp:OTP):
-
-    digits = "0123456789"
-    otp_no = ""
-    phone_no = otp.phone_no
-
-    for i in range(6) :
-        otp_no += digits[math.floor(random.random() * 10)]
-
-    client.messages.create(to= "+60" + str(phone_no),
-        from_= "+12012994622",
-        body="This is your exabytes bot OTP number : "+ otp_no
-    )
-    return {"otp_no": otp_no}
     
